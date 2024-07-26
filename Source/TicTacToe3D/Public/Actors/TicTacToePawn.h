@@ -11,7 +11,7 @@ class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
-
+class AColumn;
 
 UCLASS()
 class TICTACTOE3D_API ATicTacToePawn : public APawn
@@ -26,13 +26,15 @@ protected:
 
 public:	
 	virtual void Tick(float DeltaTime) override;
-
+	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 protected:
 	virtual void OrbitTrigered(const FInputActionValue& Value);
 
 	virtual void ZoomTrigered(const FInputActionValue& Value);
+
+	virtual void SelectCompleted(const FInputActionValue& Value);
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
@@ -43,6 +45,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* ZoomAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* SelectAction;
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Zoom", meta = (ClampMin = 1))

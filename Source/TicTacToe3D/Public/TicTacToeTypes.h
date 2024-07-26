@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "TicTacToeTypes.generated.h"
 
+#define ECC_Pointer ECC_GameTraceChannel1
+
 class UTicTacToeBoard;
 
 UENUM()

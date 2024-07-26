@@ -6,6 +6,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "TicTacToeGameMode.generated.h"
 
+class AChip;
 
 UCLASS()
 class TICTACTOE3D_API ATicTacToeGameMode : public AGameModeBase
@@ -17,5 +18,9 @@ public:
 
 protected:
 	class UTicTacToeBoard* GameBoard;
+
+public:
+	UPROPERTY(EditAnywhere, Category = "Class refs")
+	TSubclassOf<AChip> ChipClassRef;
 	
 };

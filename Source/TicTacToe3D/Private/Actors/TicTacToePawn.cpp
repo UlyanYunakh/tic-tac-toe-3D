@@ -11,6 +11,8 @@
 
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "TicTacToePlayerController.h"
+#include "Actors/Column.h"
 
 
 ATicTacToePawn::ATicTacToePawn()
@@ -50,7 +52,15 @@ void ATicTacToePawn::BeginPlay()
 void ATicTacToePawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
 
+
+void ATicTacToePawn::OnConstruction(const FTransform& Transform)
+{
+	if (CameraBoom)
+	{
+		CameraBoom->TargetArmLength = ZoomMax;
+	}
 }
 
 
@@ -60,13 +70,15 @@ void ATicTacToePawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		enhancedInputComponent->BindAction(OrbitAction, ETriggerEvent::Triggered, this, &ATicTacToePawn::OrbitTrigered);
 
 		enhancedInputComponent->BindAction(ZoomAction, ETriggerEvent::Triggered, this, &ATicTacToePawn::ZoomTrigered);
+
+		enhancedInputComponent->BindAction(SelectAction, ETriggerEvent::Completed, this, &ATicTacToePawn::SelectCompleted);
 	}
 }
 
 
 void ATicTacToePawn::OrbitTrigered(const FInputActionValue& Value)
 {
-	FVector2D input = Value.Get<FVector2D>();
+	const FVector2D input = Value.Get<FVector2D>();
 
 	if (Controller)
 	{
@@ -78,10 +90,18 @@ void ATicTacToePawn::OrbitTrigered(const FInputActionValue& Value)
 
 void ATicTacToePawn::ZoomTrigered(const FInputActionValue& Value)
 {
-	float input = Value.Get<float>();
+	const float input = Value.Get<float>();
 
-	const float newLenght = CameraBoom->TargetArmLength + 5.0f * input;
-
+	const float newLenght = CameraBoom->TargetArmLength + input;
 	CameraBoom->TargetArmLength = FMath::Clamp(newLenght, ZoomMin, ZoomMax);
+}
+
+
+void ATicTacToePawn::SelectCompleted(const FInputActionValue& Value)
+{
+	if (ATicTacToePlayerController* TTT_PC = Cast<ATicTacToePlayerController>(Controller))
+	{
+		TTT_PC->PlaceChip();
+	}
 }
 

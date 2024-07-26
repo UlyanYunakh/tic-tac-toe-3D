@@ -3,7 +3,7 @@
 
 #include "TicTacToeGameMode.h"
 #include <TicTacToeBoard.h>
-
+#include "Actors/Chip.h"
 
 void ATicTacToeGameMode::InitGameBoard()
 {

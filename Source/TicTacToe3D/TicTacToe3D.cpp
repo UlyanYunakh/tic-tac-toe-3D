@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// Ullian Yunakh.
 
 #include "TicTacToe3D.h"
 #include "Modules/ModuleManager.h"

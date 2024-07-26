@@ -1,6 +1,5 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// Ullian Yunakh.
 
 #pragma once
 
 #include "CoreMinimal.h"
-
