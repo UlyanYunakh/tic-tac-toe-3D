@@ -28,11 +28,13 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-
 	virtual bool CanPlaceChip();
 
 public:
 	virtual void Tick(float DeltaTime) override;
+
+	FORCEINLINE uint8 GetIndex() { return ColumnIndex; }
+	FORCEINLINE void SetIndex(uint8 Index) { ColumnIndex = Index; }
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
@@ -67,6 +69,6 @@ protected:
 	TArray<AChip*> Chips;
 
 protected:
+	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"))
 	uint8 ColumnIndex;
-
 };

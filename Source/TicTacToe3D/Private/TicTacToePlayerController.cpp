@@ -5,6 +5,10 @@
 #include "TicTacToeTypes.h"
 #include "Kismet/GameplayStatics.h"
 #include "Actors/Column.h"
+#include "TicTacToeGameState.h"
+#include "TicTacToeBoard.h"
+#include "TicTacToeFunctionLibrary.h"
+#include "TicTacToePlayerState.h"
 
 
 ATicTacToePlayerController::ATicTacToePlayerController()
@@ -58,5 +62,18 @@ void ATicTacToePlayerController::PlaceChip()
 {
 	if (!ActiveColumn) return;
 
-	ActiveColumn->PlaceChip(EBoardCellStatus::Player_1);
+	EBoardCellStatus PlayerFlag = GetPlayerState<ATicTacToePlayerState>()->GetPlayerFlag();
+
+	ActiveColumn->PlaceChip(PlayerFlag);
+
+	if (ATicTacToeGameState* TTT_GS = GetWorld()->GetGameState<ATicTacToeGameState>())
+	{
+		uint8 id = ActiveColumn->GetIndex();
+
+		UTicTacToeBoard* BoardRef = TTT_GS->GetBoardRef();
+
+		FBoardCellLocation loc = UTicTacToeFunctionLibrary::GetCellLocationByColumnID(BoardRef, id);
+		
+		BoardRef->BoardMove(PlayerFlag, loc);
+	}
 }

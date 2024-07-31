@@ -107,11 +107,11 @@ void UTicTacToeFunctionLibrary::GetWinningCondition(TArray<FWinningCondition>& w
 	winningConditionArray.Add(conditionDiagonal10);
 }
 
-float UTicTacToeFunctionLibrary::GetMinimaxScore(UTicTacToeBoard* const Board, const EBoardCellStatus MaxPlayer, const float Depth)
+float UTicTacToeFunctionLibrary::GetMinimaxScore(UTicTacToeBoard* const BoardRef, const EBoardCellStatus MaxPlayer, const float Depth)
 {
 	EBoardCellStatus winningPlayer = EBoardCellStatus::Empty;
 
-	if (Board->Evaluate(winningPlayer)) // true if someone is are winner
+	if (BoardRef->Evaluate(winningPlayer)) // true if someone is are winner
 	{
 		return winningPlayer == MaxPlayer ? +10.0f - Depth : -10.0f + Depth;
 	}
@@ -164,4 +164,25 @@ float UTicTacToeFunctionLibrary::Minimax(const FMinimaxPayload& Payload, const f
 
 		return bestScore;
 	}
+}
+
+
+FBoardCellLocation UTicTacToeFunctionLibrary::GetCellLocationByColumnID(UTicTacToeBoard* const BoardRef, uint8 ColumnID)
+{
+	FBoardCellLocation location;
+	location.Row = ColumnID >> 2;
+	location.Column = ColumnID % 4;
+
+	for (uint8 i = 0; i < 4; i++)
+	{
+		location.Layer = i;
+		uint8 index = location.Layer * 16 + location.Row * 4 + location.Column;
+
+		if (BoardRef->Cells[index].Status == EBoardCellStatus::Empty)
+		{
+			return location;
+		}
+	}
+
+	return location;
 }

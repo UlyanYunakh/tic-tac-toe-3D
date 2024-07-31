@@ -3,21 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/GameModeBase.h"
+#include "GameFramework/GameMode.h"
 #include "TicTacToeGameMode.generated.h"
 
 class AChip;
 
 UCLASS()
-class TICTACTOE3D_API ATicTacToeGameMode : public AGameModeBase
+class TICTACTOE3D_API ATicTacToeGameMode : public AGameMode
 {
 	GENERATED_BODY()
-
-public:
-	virtual void InitGameBoard();
-
-protected:
-	class UTicTacToeBoard* GameBoard;
 
 public:
 	UPROPERTY(EditAnywhere, Category = "Class refs")

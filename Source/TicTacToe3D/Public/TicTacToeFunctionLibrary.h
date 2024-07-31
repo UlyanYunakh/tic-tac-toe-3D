@@ -17,10 +17,9 @@ class TICTACTOE3D_API UTicTacToeFunctionLibrary : public UBlueprintFunctionLibra
 public:
 	static void GetWinningCondition(TArray<FWinningCondition>& winningConditionArray);
 
-	static float GetMinimaxScore(UTicTacToeBoard* const Board, const EBoardCellStatus MaxPlayer, const float Depth);
+	static float GetMinimaxScore(UTicTacToeBoard* const BoardRef, const EBoardCellStatus MaxPlayer, const float Depth);
 
 	static float Minimax(const FMinimaxPayload& Payload, const float Depth, const bool bMaximizingPlayer, float Alpha, float Beta);
 
-	static UTicTacToeBoard* GetGameBoard();
-
+	static FBoardCellLocation GetCellLocationByColumnID(UTicTacToeBoard* const BoardRef, uint8 ColumnID);
 };

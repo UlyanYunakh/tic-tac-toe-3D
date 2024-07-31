@@ -71,7 +71,7 @@ void ATicTacToePawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 		enhancedInputComponent->BindAction(ZoomAction, ETriggerEvent::Triggered, this, &ATicTacToePawn::ZoomTrigered);
 
-		enhancedInputComponent->BindAction(SelectAction, ETriggerEvent::Completed, this, &ATicTacToePawn::SelectCompleted);
+		enhancedInputComponent->BindAction(ClickAction, ETriggerEvent::Completed, this, &ATicTacToePawn::ClickCompleted);
 	}
 }
 
@@ -97,7 +97,7 @@ void ATicTacToePawn::ZoomTrigered(const FInputActionValue& Value)
 }
 
 
-void ATicTacToePawn::SelectCompleted(const FInputActionValue& Value)
+void ATicTacToePawn::ClickCompleted(const FInputActionValue& Value)
 {
 	if (ATicTacToePlayerController* TTT_PC = Cast<ATicTacToePlayerController>(Controller))
 	{

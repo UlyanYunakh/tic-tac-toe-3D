@@ -34,7 +34,7 @@ protected:
 
 	virtual void ZoomTrigered(const FInputActionValue& Value);
 
-	virtual void SelectCompleted(const FInputActionValue& Value);
+	virtual void ClickCompleted(const FInputActionValue& Value);
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
@@ -47,7 +47,7 @@ public:
 	UInputAction* ZoomAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	UInputAction* SelectAction;
+	UInputAction* ClickAction;
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Zoom", meta = (ClampMin = 1))

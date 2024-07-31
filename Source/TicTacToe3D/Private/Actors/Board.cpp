@@ -73,5 +73,6 @@ void ABoard::CreateColumns()
 		AColumn* column = GetWorld()->SpawnActor<AColumn>(ColumnClassRef);
 		column->AttachToComponent(ColumnsSceneComponent, FAttachmentTransformRules::SnapToTargetIncludingScale);
 		column->SetActorRelativeLocation(relativeLocation);
+		column->SetIndex(i);
 	}
 }

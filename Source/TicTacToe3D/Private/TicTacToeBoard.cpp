@@ -8,6 +8,26 @@
 UTicTacToeBoard::UTicTacToeBoard(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	UTicTacToeFunctionLibrary::GetWinningCondition(WinningConditions);
+
+	for (uint8 i = 0; i < 4; i++)
+	{
+		for (uint8 j = 0; j < 4; j++)
+		{
+			for (uint8 k = 0; k < 4; k++)
+			{
+				FBoardCellLocation loc;
+				loc.Layer = i;
+				loc.Row = j;
+				loc.Column = k;
+
+				FBoardCell cell;
+				cell.Position = loc;
+				cell.Status = EBoardCellStatus::Empty;
+
+				Cells.Add(cell);
+			}
+		}
+	}
 }
 
 
@@ -33,7 +53,7 @@ void UTicTacToeBoard::GetPossibleMoves(TArray<FBoardCellLocation>& PossibleMoves
 
 bool UTicTacToeBoard::BoardMove(const EBoardCellStatus Player, const FBoardCellLocation& MovePosition)
 {
-	const uint16 indexInArray = MovePosition.Layer + MovePosition.Row + MovePosition.Column;
+	const uint16 indexInArray = MovePosition.Layer * 16 + MovePosition.Row * 4 + MovePosition.Column;
 
 	if (Cells.IsValidIndex(indexInArray))
 	{
@@ -57,7 +77,7 @@ bool UTicTacToeBoard::Evaluate(EBoardCellStatus& WinningPlayer)
 
 		for (FBoardCellLocation& cellLocation : winningCondition.PositionQueue)
 		{
-			const uint16 indexInArray = cellLocation.Layer + cellLocation.Row + cellLocation.Column;
+			const uint16 indexInArray = cellLocation.Layer * 16 + cellLocation.Row * 4 + cellLocation.Column;
 			
 			if (Cells.IsValidIndex(indexInArray))
 			{	
