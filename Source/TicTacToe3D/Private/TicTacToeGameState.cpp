@@ -12,89 +12,78 @@ ATicTacToeGameState::ATicTacToeGameState()
 	TurnTime = 10.0f;
 }
 
-void ATicTacToeGameState::HandleMatchIsWaitingToStart()
-{
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Mathc: waiting to start"));
-	BoardRef = NewObject<UTicTacToeBoard>(this);
-}
 
 void ATicTacToeGameState::HandleMatchHasStarted()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Mathc: waiting started"));
-	
-	// check(PlayerArray.Num() > 1, TEXT("Game started with incorrect amount of players"));
-
-	// ActivePlayerID = SelectFirstPlayer();
-}
-
-
-uint32 ATicTacToeGameState::SelectFirstPlayer()
-{
-	uint32 FirstPlayerID;
-
-	if (ATicTacToePlayerState* Player_1 = Cast<ATicTacToePlayerState>(PlayerArray[0]))
+	if (GetLocalRole() == ROLE_Authority)
 	{
-		Player_1->SetPlayerFlag(EBoardCellStatus::Player_1);
-		FirstPlayerID = Player_1->GetPlayerId();
+		BoardRef = NewObject<UTicTacToeBoard>(this); // init board ref
+		NonSpectatorPlayers.Empty();
 	}
+}
 
-	if (ATicTacToePlayerState* Player_2 = Cast<ATicTacToePlayerState>(PlayerArray[0]))
+void ATicTacToeGameState::SelectFirstActivePlayer()
+{
+	if (GetLocalRole() == ROLE_Authority)
 	{
-		Player_2->SetPlayerFlag(EBoardCellStatus::Player_2);
+		ActivePlayerIndex = FMath::RandRange(0, 1);
+
+		UpdateActivePlayerRef();
 	}
-
-	return FirstPlayerID;
 }
 
-
-uint32 ATicTacToeGameState::SelectNextPlayer()
+void ATicTacToeGameState::SelectNextActivePlayer()
 {
-	int32 currID = ActivePlayerID;
-	TObjectPtr<APlayerState>* nextPlayer = PlayerArray.FindByPredicate([&currID](const TObjectPtr<APlayerState>& PS) { return PS.Get()->GetPlayerId() != currID; });
-	
-	return nextPlayer->Get()->GetPlayerId();
-}
-
-
-void ATicTacToeGameState::InitiateTurnForPlayer(uint32 PlayerID)
-{
-	ActivePlayerID = PlayerID;
-
-	StartTurnCountdown();
-}
-
-void ATicTacToeGameState::StartTurn()
-{
-	if (GetWorld())
+	if (GetLocalRole() == ROLE_Authority)
 	{
-		GetWorldTimerManager().ClearTimer(TurnCountdown);
-	}
+		ActivePlayerIndex = (ActivePlayerIndex + 1) % 2;
 
-	StartTurnTimer();
+		UpdateActivePlayerRef();
+	}
 }
 
-void ATicTacToeGameState::EndTurn()
+void ATicTacToeGameState::UpdateActivePlayerRef()
 {
-	if (GetWorld())
+	if (GetLocalRole() == ROLE_Authority)
 	{
-		GetWorldTimerManager().ClearTimer(TurnTimer);
-	}
+		if (NonSpectatorPlayers.IsEmpty())
+		{
+			InitNonSpectatorPlayersArray();
+		}
 
-	ActivePlayerID = SelectNextPlayer();
+		if (NonSpectatorPlayers.IsValidIndex(ActivePlayerIndex))
+		{
+			ActivePlayerRef = NonSpectatorPlayers[ActivePlayerIndex];
+			checkf(ActivePlayerRef, TEXT("ActivePlayerRef is nullptr"));
+
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, FString::Printf(TEXT("Server: %s is new active player"), *ActivePlayerRef->GetName()));
+		}
+	}
 }
+
+
+void ATicTacToeGameState::InitNonSpectatorPlayersArray()
+{
+	NonSpectatorPlayers = PlayerArray.FilterByPredicate([](const TObjectPtr<APlayerState>& PS) { return !PS.Get()->IsSpectator(); });
+
+	checkf(NonSpectatorPlayers.Num() == 2, TEXT("Incorrect number of players"));
+}
+
+// OTHER 
 
 void ATicTacToeGameState::StartTurnCountdown()
 {
 	if (GetWorld())
 	{
-		GetWorldTimerManager().SetTimer(TurnCountdown, this, &ATicTacToeGameState::StartTurn, TurnCountdownTime, false);
+		//GetWorldTimerManager().SetTimer(TurnCountdown, this, &ATicTacToeGameState::StartTurn, TurnCountdownTime, false);
 	}
 }
+
 
 void ATicTacToeGameState::StartTurnTimer()
 {
 	if (GetWorld())
 	{
-		GetWorldTimerManager().SetTimer(TurnTimer, this, &ATicTacToeGameState::EndTurn, TurnTime, false);
+		//GetWorldTimerManager().SetTimer(TurnTimer, this, &ATicTacToeGameState::EndTurn, TurnTime, false);
 	}
 }

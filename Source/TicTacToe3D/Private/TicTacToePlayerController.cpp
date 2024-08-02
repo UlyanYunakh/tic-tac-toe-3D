@@ -20,6 +20,17 @@ ATicTacToePlayerController::ATicTacToePlayerController()
 }
 
 
+void ATicTacToePlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (ATicTacToePlayerState* TTT_PS = GetPlayerState<ATicTacToePlayerState>())
+	{
+		TTT_PS->OnTurnStarted.BindUObject(this, &ATicTacToePlayerController::TurnStarted);
+	}
+}
+
+
 void ATicTacToePlayerController::DoCursorLineTrace()
 {
 	FHitResult hitResult;
@@ -76,4 +87,9 @@ void ATicTacToePlayerController::PlaceChip()
 		
 		BoardRef->BoardMove(PlayerFlag, loc);
 	}
+}
+
+void ATicTacToePlayerController::TurnStarted()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("Client: player can make a move"));
 }

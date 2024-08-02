@@ -17,11 +17,18 @@ class TICTACTOE3D_API ATicTacToePlayerController : public APlayerController
 
 public:
 	ATicTacToePlayerController();
+
+protected:
+	virtual void BeginPlay() override;
 	
 public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void PlaceChip();
+
+protected:
+	UFUNCTION()
+	virtual void TurnStarted();
 
 private:
 	void DoCursorLineTrace();

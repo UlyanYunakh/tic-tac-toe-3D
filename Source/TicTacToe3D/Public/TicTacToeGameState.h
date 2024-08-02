@@ -18,22 +18,27 @@ public:
 	ATicTacToeGameState();
 
 protected:
-	virtual void HandleMatchIsWaitingToStart() override;
 	virtual void HandleMatchHasStarted() override;
 
-protected:
-	virtual uint32 SelectFirstPlayer();
-	virtual uint32 SelectNextPlayer();
-
-	virtual void InitiateTurnForPlayer(uint32 PlayerID);
-	virtual void StartTurn();
-	virtual void EndTurn();
-
 public:
-	FORCEINLINE uint32 GetActivePlayerID() { return  ActivePlayerID; }
+	virtual void SelectFirstActivePlayer();
+	virtual void SelectNextActivePlayer();
+
+	FORCEINLINE APlayerState* GetActivePlayerRef() { return ActivePlayerRef; }
 
 private:
-	uint32 ActivePlayerID;
+	void UpdateActivePlayerRef();
+
+	UPROPERTY()
+	APlayerState* ActivePlayerRef;
+
+	uint32 ActivePlayerIndex;
+
+private:
+	void InitNonSpectatorPlayersArray();
+
+	UPROPERTY()
+	TArray<TObjectPtr<APlayerState>> NonSpectatorPlayers;
 
 protected:
 	virtual void StartTurnCountdown();

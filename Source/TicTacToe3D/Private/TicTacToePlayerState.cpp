@@ -4,13 +4,13 @@
 #include "TicTacToePlayerState.h"
 
 
-void ATicTacToePlayerState::StartTurn()
+void ATicTacToePlayerState::StartTurn_Implementation()
 {
 	OnTurnStarted.ExecuteIfBound();
 }
 
 
-void ATicTacToePlayerState::EndTurn()
+void ATicTacToePlayerState::EndTurn_Implementation()
 {
 	OnTurnEnded.ExecuteIfBound();
 }

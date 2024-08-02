@@ -23,8 +23,13 @@ protected:
 	EBoardCellStatus PlayerFlag;
 
 public:
+	UFUNCTION(Client, Reliable)
 	virtual void StartTurn();
+	virtual void StartTurn_Implementation();
+
+	UFUNCTION(Client, Reliable)
 	virtual void EndTurn();
+	virtual void EndTurn_Implementation();
 
 	FOnTurnStarted OnTurnStarted;
 	FOnTurnEnded OnTurnEnded;
