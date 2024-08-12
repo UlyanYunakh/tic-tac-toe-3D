@@ -8,6 +8,8 @@
 #include "Components/TimelineComponent.h"
 #include "Column.generated.h"
 
+DECLARE_DELEGATE(FOnAnimationEnded);
+
 class AChip;
 
 UCLASS()
@@ -23,7 +25,7 @@ public:
 	virtual void DisableHighlight();
 
 public:
-	void PlaceChip(EBoardCellStatus Player);
+	void PlacePiace(AChip* SpawnedPiace);
 
 protected:
 	virtual void BeginPlay() override;
@@ -33,42 +35,46 @@ protected:
 public:
 	virtual void Tick(float DeltaTime) override;
 
-	FORCEINLINE uint8 GetIndex() { return ColumnIndex; }
-	FORCEINLINE void SetIndex(uint8 Index) { ColumnIndex = Index; }
+public:
+	FOnAnimationEnded OnAnimationEnded;
+
+protected:
+	UFUNCTION()
+	void LerpPieceLocation();
+
+	UFUNCTION()
+	void EndPieceAnimation();
+
+public:
+	void SetID(uint8 ID);
+	
+	FORCEINLINE int32 GetID() const { return ColumnID; }
+
+protected:
+	UPROPERTY(EditAnywhere, Category = "Piace", meta = (AllowPrivateAccess = "true"))
+	UCurveFloat* PieceAnimationCurve;
+
+	UPROPERTY(EditAnywhere, Category = "Piace", meta = (AllowPrivateAccess = "true"))
+	float PiaeceZOffsetBottom = 10.0f;
+
+private:
+	UPROPERTY()
+	AChip* AnimatedPiece;
+
+	FVector StartAnimationLocation;
+	FVector TargetAnimationLocation;
+
+	FTimeline PieceAnimationTimeline;
+
+protected:
+	UPROPERTY()
+	TArray<AChip*> Pieces;
+
+protected:
+	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"))
+	int32 ColumnID;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* ColumnMeshComponent;
-
-protected:
-	UFUNCTION()
-	void LerpChipLocation();
-
-	UFUNCTION()
-	void EndChipAnimation();
-
-	UPROPERTY(EditAnywhere, Category = "Chip", meta = (AllowPrivateAccess = "true"))
-	UCurveFloat* ChipSpawnAnimationCurve;
-
-	UPROPERTY(EditAnywhere, Category = "Chip", meta = (AllowPrivateAccess = "true"))
-	float SpawnZOffsetMax = 100.0f;
-
-	UPROPERTY(EditAnywhere, Category = "Chip", meta = (AllowPrivateAccess = "true"))
-	float SpawnZOffsetMin = 10.0f;
-
-	UPROPERTY()
-	AChip* ActiveChip;
-
-	FVector StartLocation;
-	FVector TargetLocation;
-
-	FTimeline ChipTimeline;
-
-protected:
-	UPROPERTY()
-	TArray<AChip*> Chips;
-
-protected:
-	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"))
-	uint8 ColumnIndex;
 };

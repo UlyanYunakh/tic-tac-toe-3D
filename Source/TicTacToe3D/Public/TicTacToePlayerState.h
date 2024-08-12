@@ -7,30 +7,17 @@
 #include "TicTacToeTypes.h"
 #include "TicTacToePlayerState.generated.h"
 
-DECLARE_DELEGATE(FOnTurnStarted);
-DECLARE_DELEGATE(FOnTurnEnded);
-
 UCLASS()
 class TICTACTOE3D_API ATicTacToePlayerState : public APlayerState
 {
 	GENERATED_BODY()
-	
-public:
-	FORCEINLINE EBoardCellStatus GetPlayerFlag() { return PlayerFlag; }
-	FORCEINLINE void SetPlayerFlag(EBoardCellStatus NewFlag) { PlayerFlag = NewFlag; }
-
-protected:
-	EBoardCellStatus PlayerFlag;
 
 public:
-	UFUNCTION(Client, Reliable)
-	virtual void StartTurn();
-	virtual void StartTurn_Implementation();
+	virtual void SetMovePermision(bool bPermission);
 
-	UFUNCTION(Client, Reliable)
-	virtual void EndTurn();
-	virtual void EndTurn_Implementation();
+	FORCEINLINE bool GetMovePermission() { return bMovePermission; }
 
-	FOnTurnStarted OnTurnStarted;
-	FOnTurnEnded OnTurnEnded;
+private:
+	UPROPERTY(BlueprintReadOnly, Category="MovePermision", meta = (AllowPrivateAccess = "true"))
+	bool bMovePermission;
 };

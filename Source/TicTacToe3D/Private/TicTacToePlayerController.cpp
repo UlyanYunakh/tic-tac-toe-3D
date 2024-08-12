@@ -5,6 +5,7 @@
 #include "TicTacToeTypes.h"
 #include "Kismet/GameplayStatics.h"
 #include "Actors/Column.h"
+#include "Actors/Board.h"
 #include "TicTacToeGameState.h"
 #include "TicTacToeBoard.h"
 #include "TicTacToeFunctionLibrary.h"
@@ -23,11 +24,6 @@ ATicTacToePlayerController::ATicTacToePlayerController()
 void ATicTacToePlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-
-	if (ATicTacToePlayerState* TTT_PS = GetPlayerState<ATicTacToePlayerState>())
-	{
-		TTT_PS->OnTurnStarted.BindUObject(this, &ATicTacToePlayerController::TurnStarted);
-	}
 }
 
 
@@ -73,23 +69,18 @@ void ATicTacToePlayerController::PlaceChip()
 {
 	if (!ActiveColumn) return;
 
-	EBoardCellStatus PlayerFlag = GetPlayerState<ATicTacToePlayerState>()->GetPlayerFlag();
+	int32 ColumnID = ActiveColumn->GetID();
 
-	ActiveColumn->PlaceChip(PlayerFlag);
-
-	if (ATicTacToeGameState* TTT_GS = GetWorld()->GetGameState<ATicTacToeGameState>())
+	int32 PlayerID = -1;
+	if (APlayerState* PS = GetPlayerState<APlayerState>())
 	{
-		uint8 id = ActiveColumn->GetIndex();
+		PlayerID = PS->GetPlayerId();
+	}
+	if (PlayerID < 0) return;
 
-		UTicTacToeBoard* BoardRef = TTT_GS->GetBoardRef();
-
-		FBoardCellLocation loc = UTicTacToeFunctionLibrary::GetCellLocationByColumnID(BoardRef, id);
-		
-		BoardRef->BoardMove(PlayerFlag, loc);
+	if (ABoard* board = Cast<ABoard>(ActiveColumn->GetAttachParentActor()))
+	{
+		board->AddPieceToBoard(PlayerID, ColumnID);
 	}
 }
 
-void ATicTacToePlayerController::TurnStarted()
-{
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("Client: player can make a move"));
-}

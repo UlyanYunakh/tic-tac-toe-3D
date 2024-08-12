@@ -5,11 +5,13 @@
 #include "Kismet/GameplayStatics.h"
 #include "Actors/Chip.h"
 #include "TicTacToeGameMode.h"
+#include "Net/UnrealNetwork.h"
 
 
 AColumn::AColumn()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	bReplicates = true;
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
 
@@ -24,17 +26,17 @@ void AColumn::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (ChipSpawnAnimationCurve)
+	if (PieceAnimationCurve)
 	{
 		FOnTimelineFloat TimelineCallback;
 		FOnTimelineEventStatic TimelineFinishedCallback;
 
-		TimelineCallback.BindUFunction(this, FName("LerpChipLocation"));
-		TimelineFinishedCallback.BindUFunction(this, FName("EndChipAnimation"));
-		ChipTimeline.AddInterpFloat(ChipSpawnAnimationCurve, TimelineCallback);
-		ChipTimeline.SetTimelineFinishedFunc(TimelineFinishedCallback);
+		TimelineCallback.BindUFunction(this, FName("LerpPieceLocation"));
+		TimelineFinishedCallback.BindUFunction(this, FName("EndPieceAnimation"));
+		PieceAnimationTimeline.AddInterpFloat(PieceAnimationCurve, TimelineCallback);
+		PieceAnimationTimeline.SetTimelineFinishedFunc(TimelineFinishedCallback);
 
-		ChipTimeline.Stop();
+		PieceAnimationTimeline.Stop();
 	}
 }
 
@@ -51,30 +53,22 @@ void AColumn::DisableHighlight()
 }
 
 
-void AColumn::PlaceChip(EBoardCellStatus Player)
+void AColumn::PlacePiace(AChip* SpawnedPiace)
 {
-	if (CanPlaceChip())
-	{
-		UClass* chipClassRef = GetWorld()->GetAuthGameMode<ATicTacToeGameMode>()->ChipClassRef;
+	StartAnimationLocation = SpawnedPiace->GetActorLocation();
+	TargetAnimationLocation = GetActorLocation() + FVector::ZAxisVector * SpawnedPiace->GetChipHeight() * Pieces.Num() + FVector::ZAxisVector * PiaeceZOffsetBottom;
 
-		FTransform spawnTransform;
-		spawnTransform.SetLocation(GetActorLocation() + FVector::ZAxisVector * SpawnZOffsetMax);
+	Pieces.Add(SpawnedPiace);
 
-		ActiveChip = GetWorld()->SpawnActor<AChip>(chipClassRef, spawnTransform);
+	AnimatedPiece = SpawnedPiace;
 
-		StartLocation = ActiveChip->GetActorLocation();
-		TargetLocation = GetActorLocation() + FVector::ZAxisVector * ActiveChip->GetChipHeight() * Chips.Num() + FVector::ZAxisVector * SpawnZOffsetMin;
-
-		Chips.Add(ActiveChip);
-
-		ChipTimeline.PlayFromStart();
-	}
+	PieceAnimationTimeline.PlayFromStart();
 }
 
 
 bool AColumn::CanPlaceChip()
 {
-	return Chips.Num() < 4 && !ChipTimeline.IsPlaying();
+	return Pieces.Num() < 4 && !PieceAnimationTimeline.IsPlaying();
 }
 
 
@@ -82,29 +76,36 @@ void AColumn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	ChipTimeline.TickTimeline(DeltaTime);
+	PieceAnimationTimeline.TickTimeline(DeltaTime);
 }
 
 
-void AColumn::LerpChipLocation()
+void AColumn::LerpPieceLocation()
 {
-	if (!ActiveChip) return;
+	if (!AnimatedPiece) return;
 
-	float timelineValue = ChipTimeline.GetPlaybackPosition();
-	float alpha = ChipSpawnAnimationCurve->GetFloatValue(timelineValue);;
-	FVector newLocation = FMath::Lerp(StartLocation, TargetLocation, alpha);
+	float timelineValue = PieceAnimationTimeline.GetPlaybackPosition();
+	float alpha = PieceAnimationCurve->GetFloatValue(timelineValue);;
+	FVector newLocation = FMath::Lerp(StartAnimationLocation, TargetAnimationLocation, alpha);
 
-	ActiveChip->SetActorLocation(newLocation);
+	AnimatedPiece->SetActorLocation(newLocation);
 }
 
 
-void AColumn::EndChipAnimation()
+void AColumn::EndPieceAnimation()
 {
-	if (ActiveChip) return;
+	if (!AnimatedPiece) return;
 
-	ActiveChip->SetActorLocation(TargetLocation);
-	ActiveChip = nullptr;
+	AnimatedPiece->SetActorLocation(TargetAnimationLocation);
+	AnimatedPiece = nullptr;
 
-	ChipTimeline.Stop();
+	PieceAnimationTimeline.Stop();
+
+	OnAnimationEnded.ExecuteIfBound();
 }
 
+
+void AColumn::SetID(uint8 ID)
+{
+	ColumnID = ID;
+}

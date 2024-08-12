@@ -7,6 +7,8 @@
 #include "TicTacToeTypes.h"
 #include "TicTacToeGameState.generated.h"
 
+DECLARE_DELEGATE_OneParam(FOnTurnTimerEnd, APlayerState* /* Player ref */);
+
 class UTicTacToeBoard;
 
 UCLASS()
@@ -24,15 +26,8 @@ public:
 	virtual void SelectFirstActivePlayer();
 	virtual void SelectNextActivePlayer();
 
-	FORCEINLINE APlayerState* GetActivePlayerRef() { return ActivePlayerRef; }
-
 private:
 	void UpdateActivePlayerRef();
-
-	UPROPERTY()
-	APlayerState* ActivePlayerRef;
-
-	uint32 ActivePlayerIndex;
 
 private:
 	void InitNonSpectatorPlayersArray();
@@ -40,23 +35,41 @@ private:
 	UPROPERTY()
 	TArray<TObjectPtr<APlayerState>> NonSpectatorPlayers;
 
-protected:
-	virtual void StartTurnCountdown();
-	virtual void StartTurnTimer();
-
-	FTimerHandle TurnCountdown;
-	FTimerHandle TurnTimer;
-
-	UPROPERTY(EditAnywhere, Category = "Timers", meta = (AllowPrivateAccess = "true"))
-	float TurnCountdownTime;
-
-	UPROPERTY(EditAnywhere, Category = "Timers", meta = (AllowPrivateAccess = "true"))
-	float TurnTime;
-
 public:
-	FORCEINLINE UTicTacToeBoard* GetBoardRef() { return BoardRef; }
+	virtual void StartTurnTimer(const float TurnDuration);
+	virtual void ClearTurnTimer();
+
+	FOnTurnTimerEnd OnTurnTimerEnd;
 
 private:
+	UFUNCTION()
+	void TurnTimerCompleteCallback();
+
+	FTimerHandle TurnTimer;
+
+public:
+	FORCEINLINE APlayerState* GetActivePlayerRef() { return ActivePlayerRef; }
+
+	template< class T >
+	T* GetActivePlayerRef() const
+	{
+		return Cast<T>(ActivePlayerRef);
+	}
+
+	FORCEINLINE UTicTacToeBoard* GetBoardRef() { return BoardRef; }
+
+	EBoardCellStatus GetPlayerFlag(int32 PlayerID);
+
+	APlayerState* GetPlayer(int32 PlayerID) const;
+
+private:
+	UPROPERTY()
+	APlayerState* ActivePlayerRef;
+
+	uint32 ActivePlayerIndex;
+
+	int32 FirstPlayerID;
+
 	UPROPERTY()
 	UTicTacToeBoard* BoardRef;
 };

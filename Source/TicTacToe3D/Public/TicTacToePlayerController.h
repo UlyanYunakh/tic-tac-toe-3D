@@ -26,10 +26,6 @@ public:
 
 	virtual void PlaceChip();
 
-protected:
-	UFUNCTION()
-	virtual void TurnStarted();
-
 private:
 	void DoCursorLineTrace();
 

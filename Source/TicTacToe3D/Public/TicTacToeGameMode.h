@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
+#include "TicTacToeTypes.h"
 #include "TicTacToeGameMode.generated.h"
 
 class AChip;
@@ -14,6 +15,9 @@ class TICTACTOE3D_API ATicTacToeGameMode : public AGameMode
 {
 	GENERATED_BODY()
 
+public:
+	virtual void PlayerMadeMove(int32 PlayerID, TDelegate<void()>& PieceAddedDelegate);
+
 protected:
 	virtual void HandleMatchIsWaitingToStart() override;
 
@@ -21,7 +25,7 @@ protected:
 	
 	virtual void HandleMatchHasStarted() override;
 
-	virtual void FirstpreTurnStart();
+	virtual void FirstPreTurnStart();
 
 	virtual void PreTurnStart();
 
@@ -29,18 +33,16 @@ protected:
 
 	virtual void EndTurn();
 
+protected:
+	virtual void TurnTimerEnd(APlayerState* PlayerStateRef);
+
 public:
 	/* Time before match actually starts */
 	UPROPERTY(EditAnywhere, Category="Timers")
 	float InitialDelayTime;
 	FTimerHandle InitialDelayTimer;
 
-	/* Time between turns */
+	/* Turn duration time */
 	UPROPERTY(EditAnywhere, Category = "Timers")
-	float BetweenTurnsTime;
-	FTimerHandle BetweenTurnsTimer;
-
-	UPROPERTY(EditAnywhere, Category = "Class refs")
-	TSubclassOf<AChip> ChipClassRef;
-	
+	float TurnDuration;
 };

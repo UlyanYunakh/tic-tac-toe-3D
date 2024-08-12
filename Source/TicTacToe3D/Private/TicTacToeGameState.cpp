@@ -8,56 +8,52 @@
 
 ATicTacToeGameState::ATicTacToeGameState()
 {
-	TurnCountdownTime = 3.0f;
-	TurnTime = 10.0f;
+	
 }
 
 
 void ATicTacToeGameState::HandleMatchHasStarted()
 {
-	if (GetLocalRole() == ROLE_Authority)
-	{
-		BoardRef = NewObject<UTicTacToeBoard>(this); // init board ref
-		NonSpectatorPlayers.Empty();
-	}
+	BoardRef = NewObject<UTicTacToeBoard>(this); // init board ref
+	NonSpectatorPlayers.Empty();
 }
 
 void ATicTacToeGameState::SelectFirstActivePlayer()
 {
-	if (GetLocalRole() == ROLE_Authority)
-	{
-		ActivePlayerIndex = FMath::RandRange(0, 1);
+	InitNonSpectatorPlayersArray();
 
-		UpdateActivePlayerRef();
+	for (int32 i = 0; i < NonSpectatorPlayers.Num(); i++)
+	{
+		if (!NonSpectatorPlayers[i]->IsABot())
+		{
+			ActivePlayerIndex = i;
+			break;
+		}
 	}
+
+	UpdateActivePlayerRef();
 }
 
 void ATicTacToeGameState::SelectNextActivePlayer()
 {
-	if (GetLocalRole() == ROLE_Authority)
-	{
-		ActivePlayerIndex = (ActivePlayerIndex + 1) % 2;
+	//ActivePlayerIndex = (ActivePlayerIndex + 1) % 2;
 
-		UpdateActivePlayerRef();
-	}
+	UpdateActivePlayerRef();
 }
 
 void ATicTacToeGameState::UpdateActivePlayerRef()
 {
-	if (GetLocalRole() == ROLE_Authority)
+	if (NonSpectatorPlayers.IsEmpty())
 	{
-		if (NonSpectatorPlayers.IsEmpty())
-		{
-			InitNonSpectatorPlayersArray();
-		}
+		InitNonSpectatorPlayersArray();
+	}
 
-		if (NonSpectatorPlayers.IsValidIndex(ActivePlayerIndex))
-		{
-			ActivePlayerRef = NonSpectatorPlayers[ActivePlayerIndex];
-			checkf(ActivePlayerRef, TEXT("ActivePlayerRef is nullptr"));
+	if (NonSpectatorPlayers.IsValidIndex(ActivePlayerIndex))
+	{
+		ActivePlayerRef = NonSpectatorPlayers[ActivePlayerIndex];
+		checkf(ActivePlayerRef, TEXT("ActivePlayerRef is nullptr"));
 
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, FString::Printf(TEXT("Server: %s is new active player"), *ActivePlayerRef->GetName()));
-		}
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, FString::Printf(TEXT("GAME: %s is new active player"), *ActivePlayerRef->GetPlayerName()));
 	}
 }
 
@@ -69,21 +65,50 @@ void ATicTacToeGameState::InitNonSpectatorPlayersArray()
 	checkf(NonSpectatorPlayers.Num() == 2, TEXT("Incorrect number of players"));
 }
 
-// OTHER 
 
-void ATicTacToeGameState::StartTurnCountdown()
+void ATicTacToeGameState::StartTurnTimer(const float TurnDuration)
 {
 	if (GetWorld())
 	{
-		//GetWorldTimerManager().SetTimer(TurnCountdown, this, &ATicTacToeGameState::StartTurn, TurnCountdownTime, false);
+		FTimerDynamicDelegate turnDelegate;
+		turnDelegate.BindUFunction(this, TEXT("TurnTimerCompleteCallback"));
+		
+		GetWorldTimerManager().SetTimer(TurnTimer, turnDelegate, TurnDuration, false);
 	}
 }
 
 
-void ATicTacToeGameState::StartTurnTimer()
+void ATicTacToeGameState::ClearTurnTimer()
 {
 	if (GetWorld())
 	{
-		//GetWorldTimerManager().SetTimer(TurnTimer, this, &ATicTacToeGameState::EndTurn, TurnTime, false);
+		OnTurnTimerEnd.Unbind();
+		GetWorldTimerManager().ClearTimer(TurnTimer);
 	}
+}
+
+
+void ATicTacToeGameState::TurnTimerCompleteCallback()
+{
+	if (OnTurnTimerEnd.IsBound()) // unbind function is unchecked (if not bound app will crash)
+	{
+		OnTurnTimerEnd.Execute(ActivePlayerRef);
+		OnTurnTimerEnd.Unbind();
+	}
+}
+
+
+EBoardCellStatus ATicTacToeGameState::GetPlayerFlag(int32 PlayerID)
+{
+	return PlayerID == FirstPlayerID ? EBoardCellStatus::Player_1 : EBoardCellStatus::Player_2;
+}
+
+
+APlayerState* ATicTacToeGameState::GetPlayer(int32 PlayerID) const
+{
+	auto IsPlayerIDEqual = [&PlayerID](const TObjectPtr<APlayerState>& PS) { return PS.Get()->GetPlayerId() == PlayerID; };
+
+	const TObjectPtr<APlayerState>* player = PlayerArray.FindByPredicate(IsPlayerIDEqual);
+
+	return (*player);
 }

@@ -5,7 +5,9 @@
 #include <TicTacToeBoard.h>
 #include "Actors/Chip.h"
 #include "TicTacToeGameState.h"
-#include "GameFramework/PlayerState.h"
+#include "TicTacToePlayerState.h"
+#include "Kismet/GameplayStatics.h"
+#include "Actors/Board.h"
 
 
 void ATicTacToeGameMode::HandleMatchIsWaitingToStart()
@@ -26,14 +28,12 @@ void ATicTacToeGameMode::HandleMatchHasStarted()
 
 	if (GetWorld())
 	{
-		GetWorldTimerManager().SetTimer(InitialDelayTimer, this, &ATicTacToeGameMode::FirstpreTurnStart, InitialDelayTime, false);
+		GetWorldTimerManager().SetTimer(InitialDelayTimer, this, &ATicTacToeGameMode::FirstPreTurnStart, InitialDelayTime, false);
 	}
-
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Server: match has started"));
 }
 
 
-void ATicTacToeGameMode::FirstpreTurnStart()
+void ATicTacToeGameMode::FirstPreTurnStart()
 {
 	if (ATicTacToeGameState* TTT_GS = GetGameState<ATicTacToeGameState>())
 	{
@@ -56,16 +56,50 @@ void ATicTacToeGameMode::PreTurnStart()
 
 void ATicTacToeGameMode::StartTurn()
 {
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("GAME: Turn started"));
+
 	if (ATicTacToeGameState* TTT_GS = GetGameState<ATicTacToeGameState>())
 	{
-		APlayerState* PS = TTT_GS->GetActivePlayerRef();
-		checkf(PS, TEXT("Ref is nullptr"));
+		TTT_GS->OnTurnTimerEnd.BindUObject(this, &ATicTacToeGameMode::TurnTimerEnd);
+		TTT_GS->StartTurnTimer(TurnDuration);
 
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, FString::Printf(TEXT("Server: turn started for %s"), *PS->GetName()));
+		if (ATicTacToePlayerState* TTT_PS = TTT_GS->GetActivePlayerRef<ATicTacToePlayerState>())
+		{
+			TTT_PS->SetMovePermision(true);
+		}
 	}
 }
 
+
+void ATicTacToeGameMode::PlayerMadeMove(int32 PlayerID, TDelegate<void()>& PieceAddedDelegate)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("GAME: Player made his move"));
+
+	if (ATicTacToeGameState* TTT_GS = GetGameState<ATicTacToeGameState>())
+	{
+		ATicTacToePlayerState* TTT_PS = TTT_GS->GetActivePlayerRef<ATicTacToePlayerState>();
+
+		if (!TTT_PS || TTT_PS->GetPlayerId() != PlayerID) return;
+
+		TTT_PS->SetMovePermision(false);
+		TTT_GS->ClearTurnTimer();
+	}
+	
+	PieceAddedDelegate.BindUObject(this, &ATicTacToeGameMode::EndTurn);
+}
+
+
 void ATicTacToeGameMode::EndTurn()
 {
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("GAME: Player's turn ended"));
+
+	PreTurnStart();
+}
+
+
+void ATicTacToeGameMode::TurnTimerEnd(APlayerState* PlayerStateRef)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("GAME: Turn timer ended"));
+	EndTurn();
 }
 

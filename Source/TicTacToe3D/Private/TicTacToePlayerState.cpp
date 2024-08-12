@@ -2,15 +2,10 @@
 
 
 #include "TicTacToePlayerState.h"
+#include "Net/UnrealNetwork.h"
 
 
-void ATicTacToePlayerState::StartTurn_Implementation()
+void ATicTacToePlayerState::SetMovePermision(bool bPermission)
 {
-	OnTurnStarted.ExecuteIfBound();
-}
-
-
-void ATicTacToePlayerState::EndTurn_Implementation()
-{
-	OnTurnEnded.ExecuteIfBound();
+    bMovePermission = bPermission;
 }
