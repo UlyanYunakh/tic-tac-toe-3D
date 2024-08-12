@@ -27,7 +27,7 @@ public:
 	virtual void SelectNextActivePlayer();
 
 private:
-	void UpdateActivePlayerRef();
+	void UpdateActivePlayerRef(bool bFirstPlayer = false);
 
 private:
 	void InitNonSpectatorPlayersArray();

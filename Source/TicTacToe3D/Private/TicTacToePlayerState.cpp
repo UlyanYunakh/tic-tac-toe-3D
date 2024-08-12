@@ -8,4 +8,6 @@
 void ATicTacToePlayerState::SetMovePermision(bool bPermission)
 {
     bMovePermission = bPermission;
+
+    OnPermissionChanged.ExecuteIfBound(bPermission);
 }

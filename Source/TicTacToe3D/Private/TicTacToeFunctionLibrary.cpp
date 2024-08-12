@@ -120,7 +120,7 @@ float UTicTacToeFunctionLibrary::GetMinimaxScore(UTicTacToeBoard* const BoardRef
 }
 
 
-float UTicTacToeFunctionLibrary::Minimax(const FMinimaxPayload& Payload, const float Depth, const bool bMaximizingPlayer, float Alpha, float Beta)
+float UTicTacToeFunctionLibrary::Minimax(FMinimaxPayload& Payload, const float Depth, const bool bMaximizingPlayer, float Alpha, float Beta)
 {
 	float score = UTicTacToeFunctionLibrary::GetMinimaxScore(Payload.Board, Payload.MaximizingPlayer, Depth);
 	if (score != 0.0f) return score; // if score is non zero, it means that somebody has won
@@ -139,8 +139,15 @@ float UTicTacToeFunctionLibrary::Minimax(const FMinimaxPayload& Payload, const f
 			score = UTicTacToeFunctionLibrary::Minimax(Payload, Depth + 1, false, Alpha, Beta);
 			Payload.Board->BoardMove(EBoardCellStatus::Empty, move); // undo move
 
-			bestScore = FMath::Max(bestScore, score);
+			if (score > bestScore)
+			{
+				bestScore = score;
+				Payload.BestMove = move;
+
+				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, FString::Printf(TEXT("Best move: row %d, column %d, layer %d"), move.Row, move.Column, move.Layer));
+			}
 			Alpha = FMath::Max(Alpha, bestScore);
+
 			
 			if (Beta <= Alpha) break;
 		}
@@ -156,7 +163,13 @@ float UTicTacToeFunctionLibrary::Minimax(const FMinimaxPayload& Payload, const f
 			score = UTicTacToeFunctionLibrary::Minimax(Payload, Depth + 1, true, Alpha, Beta);
 			Payload.Board->BoardMove(EBoardCellStatus::Empty, move); // undo move
 
-			bestScore = FMath::Min(bestScore, score);
+			if (score < bestScore)
+			{
+				bestScore = score;
+				Payload.BestMove = move;
+
+				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, FString::Printf(TEXT("Best move: row %d, column %d, layer %d"), move.Row, move.Column, move.Layer));
+			}
 			Beta = FMath::Min(Beta, bestScore);
 
 			if (Beta <= Alpha) break;

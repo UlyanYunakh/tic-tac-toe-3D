@@ -7,6 +7,8 @@
 #include "TicTacToeTypes.h"
 #include "TicTacToePlayerState.generated.h"
 
+DECLARE_DELEGATE_OneParam(FOnPermissionChanged, bool /* Permission */);
+
 UCLASS()
 class TICTACTOE3D_API ATicTacToePlayerState : public APlayerState
 {
@@ -16,6 +18,8 @@ public:
 	virtual void SetMovePermision(bool bPermission);
 
 	FORCEINLINE bool GetMovePermission() { return bMovePermission; }
+
+	FOnPermissionChanged OnPermissionChanged;
 
 private:
 	UPROPERTY(BlueprintReadOnly, Category="MovePermision", meta = (AllowPrivateAccess = "true"))

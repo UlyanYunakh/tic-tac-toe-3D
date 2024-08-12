@@ -31,17 +31,17 @@ void ATicTacToeGameState::SelectFirstActivePlayer()
 		}
 	}
 
-	UpdateActivePlayerRef();
+	UpdateActivePlayerRef(true);
 }
 
 void ATicTacToeGameState::SelectNextActivePlayer()
 {
-	//ActivePlayerIndex = (ActivePlayerIndex + 1) % 2;
+	ActivePlayerIndex = (ActivePlayerIndex + 1) % 2;
 
 	UpdateActivePlayerRef();
 }
 
-void ATicTacToeGameState::UpdateActivePlayerRef()
+void ATicTacToeGameState::UpdateActivePlayerRef(bool bFirstPlayer /* = false */)
 {
 	if (NonSpectatorPlayers.IsEmpty())
 	{
@@ -51,7 +51,12 @@ void ATicTacToeGameState::UpdateActivePlayerRef()
 	if (NonSpectatorPlayers.IsValidIndex(ActivePlayerIndex))
 	{
 		ActivePlayerRef = NonSpectatorPlayers[ActivePlayerIndex];
-		checkf(ActivePlayerRef, TEXT("ActivePlayerRef is nullptr"));
+		checkf(ActivePlayerRef, TEXT("ActivePlayerRef is nullptr"));\
+
+		if (bFirstPlayer)
+		{
+			FirstPlayerID = ActivePlayerRef->GetPlayerId();
+		}
 
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, FString::Printf(TEXT("GAME: %s is new active player"), *ActivePlayerRef->GetPlayerName()));
 	}

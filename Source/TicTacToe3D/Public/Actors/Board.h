@@ -40,6 +40,9 @@ private:
 	void CreateColumns();
 	void DestroyColumns();
 
+public:
+	FORCEINLINE UTicTacToeBoard* GetGameBoardModel() { return BoardGameModelRef; }
+
 private:
 	FOnPieceAdded OnPieceAdded;
 

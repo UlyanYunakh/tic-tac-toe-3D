@@ -19,7 +19,7 @@ public:
 
 	static float GetMinimaxScore(UTicTacToeBoard* const BoardRef, const EBoardCellStatus MaxPlayer, const float Depth);
 
-	static float Minimax(const FMinimaxPayload& Payload, const float Depth, const bool bMaximizingPlayer, float Alpha, float Beta);
+	static float Minimax(FMinimaxPayload& Payload, const float Depth, const bool bMaximizingPlayer, float Alpha, float Beta);
 
 	static FBoardCellLocation GetCellLocationByColumnID(UTicTacToeBoard* const BoardRef, uint8 ColumnID);
 };

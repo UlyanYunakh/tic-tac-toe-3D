@@ -79,5 +79,8 @@ struct FMinimaxPayload
 	EBoardCellStatus MinimizingPlayer;
 
 	UPROPERTY()
+	FBoardCellLocation BestMove;
+
+	UPROPERTY()
 	uint8 MaxDepth;
 };
